@@ -13,13 +13,30 @@ const uint BUTTON_PIN = 15;
 
 //ISR Flag(s)
 uint Button_Flag = 0;
+uint test = 0;
+alarm_id_t buttonAlarm = 0;
+
+
+int64_t debounceTimer(alarm_id_t id, void *user_data){
+    if(id == buttonAlarm && gpio_get(BUTTON_PIN)){
+        Button_Flag = 1;  
+    }
+    cancel_alarm(id);
+}
 
 
 void buttonISR(uint gpio, uint32_t events){
     if(gpio == BUTTON_PIN && events == GPIO_IRQ_EDGE_RISE){
-      Button_Flag = 1;  
+      //Button_Flag = 1;
+      test++; 
+      buttonAlarm = add_alarm_in_ms(40, &debounceTimer, NULL ,true); 
     }
 }
+
+
+//debounce method:
+//Button pressed -> start a timer for x ms
+//After time has expired if button is still pressed, the press is valid
 
 int main() {
     bi_decl(bi_program_description("PROJECT DESCRIPTION"));
