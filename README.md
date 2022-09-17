@@ -1,20 +1,24 @@
-# Visual Studio Code-Ready Template Project for RP2040 using Picoprobe
+# MES Week 3 - Make Blinky
 
-A template project for quick-starting C-based RP2040 Raspberry Pi Pico projects in Visual Studio Code, using the picoprobe programmer.
+## Questions
+
+### What are the hardware registers that cause the LED to turn on and off?
+For the RP2040 the registers for the GPIO output control are SIO:GPIO_OUT[25]
+
+### What registers can you read to find the state of the button?
+The GPIO input for my button can be found in register SIO:GPIO_IN[15]
+
+### Can you read the register directly and see the button change in a debugger or by printing the values of the memory at the register address?
+
+## Button Bounce
+Below is a screen shot from my logic analyzer of the button bounce from my button
+ ![Bounce Button](/images/Button_Bounce.png)
 
 ## Prerequisites
 
 This assumes that 
 1. You have already installed OpenOCD with picoprobe, according to the steps in [Getting Started](https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf), Appendix A
-2. Your VSCode has already been configured according to the steps in [Getting Started](https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf), Chapter 6
+2. Your VSCode has already been configured according to the steps [here](https://shawnhymel.com/2096/how-to-set-up-raspberry-pi-pico-c-c-toolchain-on-windows-with-vs-code/)
 3. You have installed the picoprobe uf2 to one Pico, and it is connected to the other Pico with the correct wiring (refer again to Appendix A).
-
-## Usage
-
-1. Make a project directory in your pico-sdk parent directory (usually `~/pico`, with sdk at `~/pico/pico-sdk`), e.g. make `~/pico/my-project`.
-2. Press [Use this template], or, download this template as a zip.
-3. Clone your repository/Unzip the downloaded folder to your new project directory.
-4. Write whatever you want in main.c, add more files, go wild...
-
 
 
