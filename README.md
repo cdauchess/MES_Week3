@@ -9,6 +9,7 @@ For the RP2040 the registers for the GPIO output control are SIO:GPIO_OUT[25]
 The GPIO input for my button can be found in register SIO:GPIO_IN[15]
 
 ### Can you read the register directly and see the button change in a debugger or by printing the values of the memory at the register address?
+Yes
 
 ## Button Bounce
 Below is a screen shot from my logic analyzer of the button bounce from my button
