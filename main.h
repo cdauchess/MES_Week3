@@ -6,6 +6,10 @@
 #include "hardware/clocks.h"
 
 
+#define RISING_EDGE 1
+#define FALLING_EDGE 2
+
+
 typedef enum{
     Blinking,
     NoBlink

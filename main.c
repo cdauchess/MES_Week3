@@ -12,35 +12,26 @@ const uint LED_PIN = 25;
 const uint BUTTON_PIN = 15;
 
 //ISR Flag(s)
-uint Button_Flag = 0;
-uint test = 0;
-alarm_id_t buttonAlarm = 0;
-
-
-int64_t debounceTimer(alarm_id_t id, void *user_data){
-    if(id == buttonAlarm && gpio_get(BUTTON_PIN)){
-        Button_Flag = 1;  
-    }
-    cancel_alarm(id);
-}
-
+uint buttonEdge = 0; //1 for rising, 2 for falling
+absolute_time_t prevEdgeTime;
 
 void buttonISR(uint gpio, uint32_t events){
     if(gpio == BUTTON_PIN && events == GPIO_IRQ_EDGE_RISE){
       //Button_Flag = 1;
-      test++; 
-      buttonAlarm = add_alarm_in_ms(40, &debounceTimer, NULL ,true); 
+      prevEdgeTime = get_absolute_time();
+      buttonEdge = RISING_EDGE;
+      //buttonAlarm = add_alarm_in_ms(40, &debounceTimer, NULL ,true); 
+    }
+    else if(gpio == BUTTON_PIN && events == GPIO_IRQ_EDGE_FALL){
+        prevEdgeTime = get_absolute_time();
+        buttonEdge = FALLING_EDGE;
     }
 }
 
-
-//debounce method:
-//Button pressed -> start a timer for x ms
-//After time has expired if button is still pressed, the press is valid
-
 int main() {
+    
     bi_decl(bi_program_description("PROJECT DESCRIPTION"));
-    gpio_set_irq_enabled_with_callback(BUTTON_PIN,GPIO_IRQ_EDGE_RISE, true, &buttonISR);
+    gpio_set_irq_enabled_with_callback(BUTTON_PIN,GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &buttonISR);
     
     stdio_init_all();
 
@@ -48,6 +39,8 @@ int main() {
     BUTTON_INIT();
 
     LED_STATE LED = NoBlink;
+    volatile uint32_t currentTime = to_ms_since_boot(get_absolute_time());
+    uint Button_Flag = 0;
 
     while(1) {
         switch(LED)
@@ -76,6 +69,11 @@ int main() {
                 }
                 sleep_ms(50);
                 break;
+        }
+        currentTime = to_ms_since_boot(get_absolute_time());
+        if(buttonEdge == RISING_EDGE && (currentTime-to_ms_since_boot(prevEdgeTime)) > 5){
+            Button_Flag = 1;
+            buttonEdge = 0;
         }
     }
 }
