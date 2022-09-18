@@ -11,8 +11,11 @@
 const uint LED_PIN = 25;
 const uint BUTTON_PIN = 15;
 
+
+uint current_LED = 0;
 //ISR Flag(s)
 uint buttonEdge = 0; //1 for rising, 2 for falling
+uint count = 0;
 absolute_time_t prevEdgeTime;
 
 void buttonISR(uint gpio, uint32_t events){
@@ -28,17 +31,21 @@ void buttonISR(uint gpio, uint32_t events){
     }
 }
 
+bool LED_Toggle(repeating_timer_t *rt){
+    count++;
+}
+
 int main() {
-    
+    LED_STATE LED = NoBlink;
+    uint newLED = 0;
+    repeating_timer_t timer;
     bi_decl(bi_program_description("PROJECT DESCRIPTION"));
     gpio_set_irq_enabled_with_callback(BUTTON_PIN,GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &buttonISR);
-    
-    stdio_init_all();
+    add_repeating_timer_ms(250,LED_Toggle, &LED ,&timer);
 
     LED_INIT();
     BUTTON_INIT();
 
-    LED_STATE LED = NoBlink;
     volatile uint32_t currentTime = to_ms_since_boot(get_absolute_time());
     uint Button_Flag = 0;
 
@@ -46,28 +53,23 @@ int main() {
         switch(LED)
         {
             case Blinking:
-                LED_OFF();
-                sleep_ms(250);
-                LED_ON();
-                puts("Hello World\n");
-                sleep_ms(500);
                 if(Button_Flag == 1)
                 {
                     LED = NoBlink;
                     LED_OFF();
-                    sleep_ms(100);
                     Button_Flag = 0;
                 }
+                if(count > 1){
+                    newLED = Toggle_LED(LED);
+                }              
                 break;
             case NoBlink:
                 
                 if(Button_Flag == 1)
                 {
                     LED = Blinking;
-                    sleep_ms(100);
                     Button_Flag = 0;
                 }
-                sleep_ms(50);
                 break;
         }
         currentTime = to_ms_since_boot(get_absolute_time());
@@ -95,4 +97,23 @@ void BUTTON_INIT(){
     gpio_init(BUTTON_PIN);
     gpio_set_dir(BUTTON_PIN, GPIO_IN);
     gpio_pull_down(BUTTON_PIN);
+}
+
+uint LED_Status(){
+    uint LED_Val = 0;
+    LED_Val = gpio_get_out_level(LED_PIN);
+    return LED_Val;
+}
+
+uint Toggle_LED(LED_STATE currentState){
+    if(LED_Status()){
+        LED_OFF();
+        count = 0;
+        return 0;
+    }
+    else if(!LED_Status()){
+        LED_ON();
+        count = 0;
+        return 1;
+    }
 }
